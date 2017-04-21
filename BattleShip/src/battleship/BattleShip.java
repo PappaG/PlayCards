@@ -156,7 +156,31 @@ public class BattleShip {
 
     // get user input (x,y co-ords) and evaluate if shot hits. If not give a hint
     static void fireShot(GridPoint[][] shipGrid) {
-        String userInput = "" ; //user'ss last keystroke'
+        boolean hitScored = false;
+                
+        while ( !hitScored) {
+            String userInput = getUserInput(5);
+            System.out.println("Validated user input is :" + userInput);
+            hitScored = checkHit(shipGrid, userInput);
+            displayShips(shipGrid, 1);
+        }
+       
+    }
+    
+    
+    static String getUserInput(int gridSize) {   
+        
+        // set max and min for columns (single char starting with 'A') 
+        // and rows (int starting with 1) 
+        char minCol = 'A';
+        int asciiMinCol = minCol;  
+        int asciiMaxCol = minCol + gridSize -1;
+        char maxCol = (char)asciiMaxCol;
+        int minRow = 1;
+        int maxRow = gridSize;
+        
+        String userInput; //raw user input
+        String validatedInput; //validated and formatted input
         char xInput = 'z'; // user's x co-ord guess
         int yInput = 0; // user's y co-ord guess
         Scanner reader = new Scanner(System.in);
@@ -165,29 +189,58 @@ public class BattleShip {
         
         System.out.println("Please enter target co-ordinates e.g. B2 and press enter :");
         
-        while ( !validXinput) || !validYinput ) {
+        while ( !validXinput || !validYinput ) {
            userInput = reader.nextLine();
+           userInput = userInput.toUpperCase();
             System.out.println("You requested co-ordinates : " + userInput);
             xInput = Character.toUpperCase( userInput.charAt(0) );
-            if (xInput >= 'A' && xInput <= 'E') { validXinput = true; }
+            if (xInput >= minCol && xInput <= maxCol) { validXinput = true; }
               else { 
-                System.out.println("Please enter character A - E for column. You typed :" + xInput);
+                System.out.println("Please enter character " + minCol + " - " + maxCol + " for column. You typed :" + xInput);
                 validXinput = false;
                             } 
-            System.out.println("Row selected was : " + userInput.substring(1,2) );
+            // System.out.println("Row selected was : " + userInput.substring(1,2) );
             yInput = Integer.valueOf( userInput.substring(1,2) );
-            System.out.println("Row selected was reworked to : " + yInput );
+            // System.out.println("Row selected was reworked to : " + yInput );
             if (yInput >= 1 && yInput <= 5) { validYinput = true; }
               else { 
-                System.out.println("Please enter number from  1 - 5 for  row. You typed :" + yInput);
+                System.out.println("Please enter number from " + minRow + " - " + maxRow + " for row. You typed :" + yInput);
                 validYinput = false;      
             } 
             System.out.println("Let's try again.");
         }
-        System.out.println("Co-ordinate entered was: " + xInput + yInput);
+        validatedInput = xInput + String.valueOf(yInput);
+        //System.out.println("Co-ordinate entered was good: " + validatedInput);
              
-        
+        return( validatedInput );
     }
 
+    
+    static boolean checkHit(GridPoint[][] shipGrid, String userInput) {
+        boolean hitScored;
+        // parsa A1 userInput in to int column and row reference
+        char minCol = 'A';
+        int asciiMinCol = minCol;  
+        int colRef = userInput.charAt(0) - asciiMinCol + 1;
+        int rowRef = Integer.valueOf(userInput.substring(userInput.length() -1));
+        String missID = "~";
+        String targetContents = shipGrid[colRef][rowRef].getGridPointContains();
+        
+        if ( targetContents.equals(missID) ) {
+            hitScored = false;
+            shipGrid[colRef][rowRef].setGridPointStatus(1); // set target status to miss
+            shipGrid[colRef][rowRef].setGridPointContains("*"); // set target status to mi
+            System.out.println("You missed ...");
+            } else {
+            hitScored = true;
+            shipGrid[colRef][rowRef].setGridPointStatus(2); // set target status to hit
+             shipGrid[colRef][rowRef].setGridPointContains("X"); // set target status to hit           
+            System.out.println("A hit! Ship number :" + targetContents);
+        }
+        
+        
+        
+        return(hitScored);
+    }
 }
 
